@@ -1,325 +1,441 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRoute } from "wouter";
-import { storeData, Product } from "@/data/store";
+import { storeData } from "@/data/store";
 import { TopBar } from "@/components/layout/TopBar";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { FAQ } from "@/components/home/FAQ";
 import { Reviews } from "@/components/home/Reviews";
-import { ProductGrid } from "@/components/home/ProductGrid";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { 
-  Breadcrumb, 
-  BreadcrumbItem, 
-  BreadcrumbLink, 
-  BreadcrumbList, 
-  BreadcrumbPage, 
-  BreadcrumbSeparator 
-} from "@/components/ui/breadcrumb";
-import { 
-  Accordion, 
-  AccordionContent, 
-  AccordionItem, 
-  AccordionTrigger 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
 } from "@/components/ui/accordion";
 import { generateWhatsAppLink } from "@/lib/whatsapp";
-import { Star, ShieldCheck, Truck, Clock, Check } from "lucide-react";
+import {
+  Star,
+  ShieldCheck,
+  Truck,
+  Check,
+  BadgeCheck,
+  Package,
+  RotateCcw,
+  PhoneCall,
+  Flame,
+  AlertTriangle,
+  Users,
+  Lock,
+  ChevronDown,
+} from "lucide-react";
 
+/* ═══════════════════════════ HOOKS ═══════════════════════════ */
+function useCountdown(h = 2, m = 59, s = 22) {
+  const [time, setTime] = useState({ h, m, s });
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTime((p) => {
+        let { h, m, s } = p;
+        s--;
+        if (s < 0) { m--; s = 59; }
+        if (m < 0) { h--; m = 59; }
+        if (h < 0) { h = 0; m = 0; s = 0; }
+        return { h, m, s };
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(time.h)}:${pad(time.m)}:${pad(time.s)}`;
+}
+
+/* ═══════════════════════════ CITIES ═════════════════════════ */
+const SAUDI_CITIES = [
+  "الرياض", "جدة", "مكة المكرمة", "المدينة المنورة", "الدمام",
+  "الخبر", "الأحساء", "الطائف", "بريدة", "تبوك",
+  "أبها", "خميس مشيط", "الجبيل", "ينبع", "حائل",
+  "نجران", "جيزان", "القطيف", "الخرج", "المجمعة",
+];
+
+/* ═══════════════════ SOCIAL PROOF TICKER ════════════════════ */
+const TICKERS = [
+  "🛒 محمد من الرياض اشترى للتو",
+  "⭐️ سارة من جدة: «التوصيل كان سريع جداً!»",
+  "🛒 خالد من الدمام أضاف للسلة الآن",
+  "⭐️ نورة من مكة: «الدفع عند الاستلام ممتاز»",
+  "🔥 5 أشخاص يشاهدون هذا المنتج الآن",
+  "🛒 عبدالله من الخبر اشترى قبل دقيقتين",
+];
+
+function SocialTicker() {
+  const [idx, setIdx] = useState(0);
+  const [vis, setVis] = useState(true);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setVis(false);
+      setTimeout(() => { setIdx((i) => (i + 1) % TICKERS.length); setVis(true); }, 350);
+    }, 3600);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div className="ticker-wrap">
+      <span className={`ticker-text ${vis ? "t-in" : "t-out"}`}>{TICKERS[idx]}</span>
+    </div>
+  );
+}
+
+/* ═══════════════════════ IMAGE GALLERY ═══════════════════════ */
+function Gallery({ images, badge }: { images: string[]; badge: string }) {
+  const [active, setActive] = useState(0);
+  return (
+    <div className="gallery">
+      <div className="gallery-main">
+        <img key={active} src={images[active]} alt="" className="gallery-img fade-in" />
+        <span className="g-badge">{badge}</span>
+        <span className="g-secure"><Lock className="icon-xs" /> تسوق آمن</span>
+      </div>
+      {images.length > 1 && (
+        <div className="gallery-thumbs">
+          {images.map((s, i) => (
+            <div key={i} className={`g-thumb ${active === i ? "active" : ""}`} onClick={() => setActive(i)}>
+              <img src={s} alt="" />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════ BUNDLE OPTION ══════════════════════ */
+const BUNDLES = [
+  { v: "1", label: "قطعة واحدة", qty: 1, disc: 0 },
+  { v: "2", label: "قطعتان", qty: 2, disc: 0.2, badge: "الأكثر طلباً", bc: "#0070f3" },
+  { v: "3", label: "3 قطع", qty: 3, disc: 0.3, badge: "أفضل قيمة", bc: "#dc2626" },
+];
+
+function Bundles({
+  sel, onSel, base, cur,
+}: { sel: string; onSel: (v: string) => void; base: number; cur: string }) {
+  return (
+    <div className="card">
+      <p className="card-title"><Flame className="icon-s orange-icon" /> اختر الكمية</p>
+      <div className="bundles">
+        {BUNDLES.map((b) => {
+          const total = (base * b.qty * (1 - b.disc)).toFixed(2);
+          const orig = (base * b.qty).toFixed(2);
+          const on = sel === b.v;
+          return (
+            <div key={b.v} className={`bundle ${on ? "bundle-on" : ""}`} onClick={() => onSel(b.v)}>
+              {b.badge && <span className="b-badge" style={{ background: b.bc }}>{b.badge}</span>}
+              <div className={`radio ${on ? "radio-on" : ""}`} />
+              <div className="b-label">
+                <span className="b-name">{b.label}</span>
+                {b.disc > 0 && <span className="b-save">وفّر {b.disc * 100}%</span>}
+              </div>
+              <div className="b-price">
+                <span className="b-total">{total} {cur}</span>
+                {b.disc > 0 && <span className="b-orig">{orig} {cur}</span>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════ ORDER FORM ════════════════════════ */
+function OrderForm({
+  fd, set, onSubmit, loading, pricing, cur,
+}: {
+  fd: Record<string, string>;
+  set: (k: string, v: string) => void;
+  onSubmit: () => void;
+  loading: boolean;
+  pricing: { total: string; save: string };
+  cur: string;
+}) {
+  return (
+    <div className="card order-card">
+      <p className="card-title"><Package className="icon-s blue-icon" /> أدخل بياناتك لإتمام الطلب</p>
+      <p className="card-sub">سيتصل بك فريقنا لتأكيد الطلب خلال دقائق</p>
+
+      <div className="fields">
+        {/* الاسم – خانة واحدة */}
+        <div className="field">
+          <label>الاسم</label>
+          <Input placeholder="الاسم الكامل" value={fd.name}
+            onChange={(e) => set("name", e.target.value)} />
+        </div>
+
+        {/* رقم الجوال */}
+        <div className="field">
+          <label>رقم الجوال</label>
+          <div className="phone-wrap">
+            <span className="phone-pre">🇸🇦 +966</span>
+            <Input className="phone-inp" placeholder="5x xxx xxxx" type="tel"
+              value={fd.phone} onChange={(e) => set("phone", e.target.value)} />
+          </div>
+        </div>
+
+        {/* المدينة – dropdown */}
+        <div className="field">
+          <label>المدينة</label>
+          <div className="select-wrap">
+            <select className="select-input" value={fd.city}
+              onChange={(e) => set("city", e.target.value)}>
+              <option value="">اختر مدينتك</option>
+              {SAUDI_CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <ChevronDown className="select-arrow" />
+          </div>
+        </div>
+
+        {/* العنوان الوطني */}
+        <div className="field">
+          <label>العنوان الوطني</label>
+          <Input placeholder="مثال: الحي، الشارع، رقم المبنى" value={fd.address}
+            onChange={(e) => set("address", e.target.value)} />
+        </div>
+
+        {/* ملاحظات */}
+        <div className="field">
+          <label>ملاحظات (اختياري)</label>
+          <textarea
+            className="notes-input"
+            placeholder="أي تعليمات إضافية للتوصيل..."
+            rows={2}
+            value={fd.notes}
+            onChange={(e) => set("notes", e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* ملخص السعر */}
+      <div className="price-summary-row">
+        <span className="ps-label">الإجمالي</span>
+        <span className="ps-price">{pricing.total} {cur}</span>
+        {pricing.save !== "0%" && <span className="ps-save">وفّرت {pricing.save}</span>}
+      </div>
+
+      {/* trust micro */}
+      <div className="micro-trust">
+        <span><ShieldCheck className="icon-xs green-icon" /> ضمان 30 يوماً</span>
+        <span><Truck className="icon-xs blue-icon" /> شحن مجاني</span>
+        <span><Check className="icon-xs green-icon" /> دفع عند الاستلام</span>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════ TRUST BADGES (Noon-style) ══════════════ */
+function TrustBadges() {
+  const items = [
+    { icon: <Package className="icon-m" />, c: "#f97316", t: "الدفع عند الاستلام", s: "ادفع بعد ما تستلم" },
+    { icon: <Truck className="icon-m" />, c: "#3b82f6", t: "توصيل سريع", s: "2–5 أيام عمل" },
+    { icon: <RotateCcw className="icon-m" />, c: "#7c3aed", t: "إرجاع مجاني", s: "خلال 30 يوماً" },
+    { icon: <ShieldCheck className="icon-m" />, c: "#10b981", t: "ضمان الجودة", s: "أصلي أو نرجع المبلغ" },
+    { icon: <PhoneCall className="icon-m" />, c: "#0ea5e9", t: "دعم سريع", s: "واتساب أو اتصال" },
+    { icon: <Users className="icon-m" />, c: "#f59e0b", t: "+5000 عميل سعودي", s: "تقييم 4.8 / 5" },
+  ];
+  return (
+    <div className="trust-badges-grid">
+      {items.map((b, i) => (
+        <div key={i} className="trust-badge-card" style={{ animationDelay: `${i * 55}ms` }}>
+          <div className="tb-icon" style={{ color: b.c, background: b.c + "18" }}>{b.icon}</div>
+          <p className="tb-title">{b.t}</p>
+          <p className="tb-sub">{b.s}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ════════════════════════ STICKY CTA ════════════════════════ */
+function StickyCTA({ price, cur, onOrder, loading }: {
+  price: string; cur: string; onOrder: () => void; loading: boolean;
+}) {
+  return (
+    <div className="sticky-cta">
+      <div className="sticky-inner">
+        <div className="sticky-info">
+          <span className="sticky-price">{price} {cur}</span>
+          <span className="sticky-label">الدفع عند الاستلام</span>
+        </div>
+        <button className={`cta-btn sticky-btn ${loading ? "loading" : ""}`} onClick={onOrder} disabled={loading}>
+          {loading ? <span className="spinner" /> : <><Package className="icon-s" /> اطلب الآن</>}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════ MAIN PAGE ═════════════════════════ */
 export default function ProductPage() {
-  const [match, params] = useRoute("/p/:slug");
-  const slug = params?.slug;
-  const product = storeData.products.find(p => p.slug === slug) || storeData.products[0]; // Fallback to first if not found (or handle 404)
+  const [, params] = useRoute("/p/:slug");
+  const product = storeData.products.find((p) => p.slug === params?.slug) || storeData.products[0];
 
-  const [selectedBundle, setSelectedBundle] = useState("1");
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    address: "",
-    city: "",
-    phone: ""
-  });
+  const [sel, setSel] = useState("1");
+  const [fd, setFd] = useState({ name: "", phone: "", city: "", address: "", notes: "" });
+  const [loading, setLoading] = useState(false);
+  const countdown = useCountdown(2, 47, 9);
+  const formRef = useRef<HTMLDivElement>(null);
 
-  // Calculate pricing based on bundle
   const getPrice = () => {
-    const base = product.price;
-    if (selectedBundle === "2") return { total: (base * 2 * 0.8).toFixed(2), save: "20%" };
-    if (selectedBundle === "3") return { total: (base * 3 * 0.7).toFixed(2), save: "30%" };
-    return { total: base.toFixed(2), save: "0%" };
+    const b = product.price;
+    if (sel === "2") return { total: (b * 2 * 0.8).toFixed(2), save: "20%" };
+    if (sel === "3") return { total: (b * 3 * 0.7).toFixed(2), save: "30%" };
+    return { total: b.toFixed(2), save: "0%" };
   };
-
   const pricing = getPrice();
 
+  const set = (k: string, v: string) => setFd((p) => ({ ...p, [k]: v }));
+
   const handleOrder = () => {
-    const link = generateWhatsAppLink({
-      productName: product.name,
-      price: Number(pricing.total),
-      quantity: Number(selectedBundle),
-      bundle: selectedBundle === "1" ? "قطعة واحدة" : `${selectedBundle} قطع`,
-      customerName: `${formData.firstName} ${formData.lastName}`,
-      customerPhone: formData.phone,
-      customerAddress: `${formData.city} - ${formData.address}`
-    });
-    window.open(link, '_blank');
+    setLoading(true);
+    setTimeout(() => {
+      const link = generateWhatsAppLink({
+        productName: product.name,
+        price: Number(pricing.total),
+        quantity: Number(sel),
+        bundle: sel === "1" ? "قطعة واحدة" : `${sel} قطع`,
+        customerName: fd.name,
+        customerPhone: fd.phone,
+        customerAddress: `${fd.city} – ${fd.address}${fd.notes ? " – ملاحظات: " + fd.notes : ""}`,
+      });
+      window.open(link, "_blank");
+      setLoading(false);
+    }, 600);
   };
 
+  const scrollToForm = () => formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50/50">
+    <div className="page-root">
       <TopBar />
       <Header />
 
-      <main className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <Breadcrumb className="mb-8 text-sm text-gray-500">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">الرئيسية</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">{product.category}</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{product.name}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+      <main className="page-main">
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Right Column: Images (RTL: actually visually Right if dir=rtl, so first in DOM) */}
-          <div className="space-y-4">
-            <div className="aspect-square bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm relative">
-              <img 
-                src={product.images[0]} 
-                alt={product.name} 
-                className="w-full h-full object-cover"
-              />
-              <span className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full font-bold shadow-md">
-                {product.discountLabel}
-              </span>
-            </div>
-            {/* Thumbnails if multiple images */}
-            {product.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-4">
-                {product.images.map((img, i) => (
-                  <div key={i} className="aspect-square rounded-xl overflow-hidden border border-gray-200 cursor-pointer hover:border-black transition-colors">
-                    <img src={img} className="w-full h-full object-cover" />
-                  </div>
+        {/* ── صورة المنتج ── */}
+        <Gallery images={product.images} badge={product.discountLabel} />
+
+        {/* ── اسم + تقييمات ── */}
+        <div className="details-block">
+          <div className="stars-row">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Star key={i} className={`star ${i <= Math.round(product.ratingAvg) ? "star-on" : "star-off"}`} />
+            ))}
+            <span className="review-count">({product.reviewsCount} تقييم)</span>
+            <span className="verified-badge"><BadgeCheck className="icon-xs" /> مؤكد</span>
+          </div>
+
+          <h1 className="product-title">{product.name}</h1>
+          <p className="product-desc">{product.shortDescription}</p>
+
+          {/* السعر */}
+          <div className="price-block">
+            <span className="price-main">{product.price} {storeData.currency}</span>
+            <span className="price-was">{product.compareAt} {storeData.currency}</span>
+            <span className="price-disc">{product.discountLabel}</span>
+          </div>
+
+          {/* عداد تنازلي تحت السعر */}
+          <div className="countdown-row">
+            <AlertTriangle className="icon-xs red-icon" />
+            <span>العرض ينتهي بعد:</span>
+            <span className="cd-timer">{countdown}</span>
+            <span className="cd-stock">· 7 قطع فقط</span>
+          </div>
+
+          {/* سوشيال بروف تيكر */}
+          <SocialTicker />
+        </div>
+
+        {/* ── Trust Bar أفقي ── */}
+        <div className="hbar">
+          <div className="hbar-item"><ShieldCheck className="icon-s green-icon" /><span>ضمان 30 يوم</span></div>
+          <div className="hbar-sep" />
+          <div className="hbar-item"><Truck className="icon-s blue-icon" /><span>شحن مجاني</span></div>
+          <div className="hbar-sep" />
+          <div className="hbar-item"><Package className="icon-s orange-icon" /><span>COD</span></div>
+          <div className="hbar-sep" />
+          <div className="hbar-item"><RotateCcw className="icon-s purple-icon" /><span>إرجاع مجاني</span></div>
+        </div>
+
+        {/* ── كميات ── */}
+        <Bundles sel={sel} onSel={setSel} base={product.price} cur={storeData.currency} />
+
+        {/* ── نموذج الطلب ── */}
+        <div ref={formRef}>
+          <OrderForm fd={fd} set={set} onSubmit={handleOrder} loading={loading}
+            pricing={pricing} cur={storeData.currency} />
+        </div>
+
+        {/* ── اكورديون المنتج ── */}
+        <Accordion type="single" collapsible defaultValue="desc" className="prod-accordion">
+          <AccordionItem value="desc">
+            <AccordionTrigger className="acc-trg">وصف المنتج</AccordionTrigger>
+            <AccordionContent className="acc-body">
+              <p className="mb-3">{product.description}</p>
+              <ul className="feat-list">
+                {product.features.map((f, i) => (
+                  <li key={i}><Check className="icon-s green-icon" />{f}</li>
                 ))}
-              </div>
-            )}
-          </div>
+              </ul>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="ship">
+            <AccordionTrigger className="acc-trg">
+              <Truck className="icon-s blue-icon" /> الشحن والتوصيل
+            </AccordionTrigger>
+            <AccordionContent className="acc-body">
+              <p>📦 شحن مجاني على الطلبات فوق {storeData.freeShippingThreshold} {storeData.currency}.</p>
+              <p>🚚 توصيل خلال <strong>2–5 أيام عمل</strong> لجميع مناطق المملكة.</p>
+              <p>📬 رسالة تتبع فور شحن طلبك.</p>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="return">
+            <AccordionTrigger className="acc-trg">
+              <RotateCcw className="icon-s purple-icon" /> الإرجاع والاسترداد
+            </AccordionTrigger>
+            <AccordionContent className="acc-body">
+              <p>✅ إرجاع مجاني خلال <strong>30 يوماً</strong> من الاستلام.</p>
+              <p>💰 استرداد كامل – بدون شروط معقدة.</p>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="pay">
+            <AccordionTrigger className="acc-trg">
+              <Package className="icon-s orange-icon" /> الدفع عند الاستلام
+            </AccordionTrigger>
+            <AccordionContent className="acc-body">
+              <p>💵 لا تحتاج بطاقة. ادفع بعد ما تشوف المنتج بين يديك.</p>
+              <p>🔒 شحن أولاً، دفع عند الاستلام.</p>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
-          {/* Left Column: Details & Form */}
-          <div className="space-y-8">
-            <div>
-              <div className="flex items-center gap-2 text-yellow-500 mb-2">
-                 <div className="flex text-yellow-400">
-                   {[1,2,3,4,5].map(i => <Star key={i} className={`w-4 h-4 ${i <= Math.round(product.ratingAvg) ? 'fill-current' : ''}`} />)}
-                 </div>
-                 <span className="text-gray-400 text-sm">({product.reviewsCount} مراجعة)</span>
-              </div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">{product.name}</h1>
-              
-              <div className="flex items-end gap-3 mb-6">
-                <span className="text-3xl font-bold text-red-500">{product.price} {storeData.currency}</span>
-                <span className="text-xl text-gray-400 line-through mb-1">{product.compareAt} {storeData.currency}</span>
-              </div>
-
-              <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-2 rounded-lg inline-flex items-center gap-2 text-sm font-medium animate-pulse">
-                <Clock className="w-4 h-4" />
-                عرض محدود: ينتهي قريباً!
-              </div>
-            </div>
-
-            {/* Bundles */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-              <h3 className="font-bold mb-4 flex items-center gap-2">
-                <span className="w-1 h-6 bg-black rounded-full block"></span>
-                اختر العرض المناسب:
-              </h3>
-              
-              <RadioGroup value={selectedBundle} onValueChange={setSelectedBundle} className="space-y-3">
-                
-                {/* Option 1 */}
-                <div className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all ${selectedBundle === "1" ? "border-black bg-gray-50" : "border-gray-200 hover:border-gray-300"}`}
-                     onClick={() => setSelectedBundle("1")}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <RadioGroupItem value="1" id="b1" />
-                      <Label htmlFor="b1" className="cursor-pointer font-bold text-lg">اشتري 1</Label>
-                    </div>
-                    <div className="text-right">
-                      <span className="block font-bold text-lg">{product.price} {storeData.currency}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Option 2 */}
-                <div className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all ${selectedBundle === "2" ? "border-black bg-gray-50" : "border-gray-200 hover:border-gray-300"}`}
-                     onClick={() => setSelectedBundle("2")}>
-                  <span className="absolute -top-3 left-4 bg-black text-white text-xs px-2 py-1 rounded">الأكثر مبيعاً</span>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <RadioGroupItem value="2" id="b2" />
-                      <div>
-                        <Label htmlFor="b2" className="cursor-pointer font-bold text-lg block">اشتري 2</Label>
-                        <span className="text-xs text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded">توفير 20%</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="block font-bold text-lg">{(product.price * 2 * 0.8).toFixed(2)} {storeData.currency}</span>
-                      <span className="block text-xs text-gray-400 line-through">{(product.price * 2).toFixed(2)} {storeData.currency}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Option 3 */}
-                <div className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all ${selectedBundle === "3" ? "border-black bg-gray-50" : "border-gray-200 hover:border-gray-300"}`}
-                     onClick={() => setSelectedBundle("3")}>
-                   <span className="absolute -top-3 left-4 bg-red-500 text-white text-xs px-2 py-1 rounded">أفضل عرض</span>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <RadioGroupItem value="3" id="b3" />
-                       <div>
-                        <Label htmlFor="b3" className="cursor-pointer font-bold text-lg block">اشتري 3</Label>
-                        <span className="text-xs text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded">توفير 30%</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="block font-bold text-lg">{(product.price * 3 * 0.7).toFixed(2)} {storeData.currency}</span>
-                      <span className="block text-xs text-gray-400 line-through">{(product.price * 3).toFixed(2)} {storeData.currency}</span>
-                    </div>
-                  </div>
-                </div>
-
-              </RadioGroup>
-            </div>
-
-            {/* Form */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-               <h3 className="font-bold mb-4 flex items-center gap-2">
-                <span className="w-1 h-6 bg-black rounded-full block"></span>
-                لإجراء طلب، يرجى إدخال معلوماتك هنا:
-              </h3>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>الاسم الأول</Label>
-                    <Input 
-                      placeholder="الاسم الأول" 
-                      value={formData.firstName}
-                      onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                    />
-                  </div>
-                   <div className="space-y-2">
-                    <Label>العائلة</Label>
-                    <Input 
-                      placeholder="اسم العائلة" 
-                      value={formData.lastName}
-                      onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>رقم الهاتف</Label>
-                  <div className="relative">
-                    <Input 
-                      className="pl-20 text-left dir-ltr" 
-                      placeholder="50xxxxxxx" 
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    />
-                    <div className="absolute left-3 top-2.5 flex items-center gap-1 opacity-50 text-sm">
-                       <span>+966</span>
-                       <span className="w-5 h-3 bg-green-700 rounded-sm overflow-hidden relative border border-gray-200">
-                         {/* Saudi Flag simplified */}
-                         <div className="absolute inset-0 bg-green-700 flex items-center justify-center text-[6px] text-white">SA</div>
-                       </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>المدينة</Label>
-                  <Input 
-                    placeholder="الرياض، جدة..." 
-                    value={formData.city}
-                    onChange={(e) => setFormData({...formData, city: e.target.value})}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>عنوان التوصيل</Label>
-                  <Input 
-                    placeholder="الحي، الشارع..." 
-                    value={formData.address}
-                    onChange={(e) => setFormData({...formData, address: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <div className="mt-8 pt-4 border-t">
-                <Button 
-                  size="lg" 
-                  className="w-full h-14 text-lg font-bold bg-black hover:bg-gray-800 text-white rounded-xl shadow-lg shadow-black/10"
-                  onClick={handleOrder}
-                >
-                  اطلب الآن - الدفع عند الاستلام
-                </Button>
-                
-                <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-500">
-                   <span className="flex items-center gap-1"><ShieldCheck className="w-4 h-4 text-green-500" /> ضمان 30 يوماً</span>
-                   <span className="flex items-center gap-1"><Truck className="w-4 h-4 text-red-500" /> شحن مجاني</span>
-                   <span className="flex items-center gap-1"><Check className="w-4 h-4 text-blue-500" /> الدفع عند الاستلام</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Description & Policies */}
-             <div className="prose max-w-none text-gray-600 leading-relaxed">
-               <h3 className="font-bold text-black text-xl mb-4">الوصف</h3>
-               <p>{product.description}</p>
-               
-               <h4 className="font-bold text-black mt-6 mb-2">المميزات:</h4>
-               <ul className="list-disc list-inside space-y-1">
-                 {product.features.map((f, i) => <li key={i}>{f}</li>)}
-               </ul>
-             </div>
-
-             <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="shipping">
-                  <AccordionTrigger>الشحن والتوصيل</AccordionTrigger>
-                  <AccordionContent>
-                    شحن مجاني للطلبات فوق {storeData.freeShippingThreshold} {storeData.currency}. التوصيل خلال 2-5 أيام عمل.
-                  </AccordionContent>
-                </AccordionItem>
-                 <AccordionItem value="return">
-                  <AccordionTrigger>سياسة الاسترجاع</AccordionTrigger>
-                  <AccordionContent>
-                    يمكنك استرجاع المنتج خلال 30 يوم من تاريخ الشراء بشرط أن يكون في حالته الأصلية.
-                  </AccordionContent>
-                </AccordionItem>
-             </Accordion>
-
-          </div>
+        {/* ── لماذا نحن ── */}
+        <div className="why-section">
+          <h2 className="why-title">لماذا تتسوق معنا؟</h2>
+          <p className="why-sub">نفس ضمانات كبرى المتاجر – بلمسة محلية سعودية 🇸🇦</p>
+          <TrustBadges />
         </div>
 
-        <div className="mt-20">
-          <Reviews />
-        </div>
-        
-        <div className="mt-20">
-           <FAQ />
-        </div>
+        {/* ── Reviews ── */}
+        <Reviews />
+
+        {/* ── FAQ ── */}
+        <FAQ />
+
       </main>
 
       <Footer />
+
+      {/* Sticky CTA – دائم */}
+      <StickyCTA price={pricing.total} cur={storeData.currency} onOrder={scrollToForm} loading={loading} />
     </div>
   );
 }

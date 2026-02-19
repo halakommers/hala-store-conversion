@@ -402,8 +402,8 @@ body {
 
 /* ═══════════════════ SOCIAL TICKER ═══════════════════ */
 .ticker-wrap {
-  background: #fefce8;
-  border: 1px solid #fde047;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
   border-radius: 9px;
   padding: 7px 12px;
   min-height: 32px;
@@ -411,7 +411,7 @@ body {
   align-items: center;
   font-size: .76rem;
   font-weight: 600;
-  color: #713f12;
+  color: #14532d;
   overflow: hidden;
 }
 
@@ -593,12 +593,19 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1;
 }
 
 .field label {
   font-size: .75rem;
   font-weight: 700;
   color: #374151;
+}
+
+/* حقلان جنب لجنب */
+.fields-row {
+  display: flex;
+  gap: 8px;
 }
 
 /* phone */
@@ -1132,4 +1139,340 @@ body {
 section.py-16 {
   padding-top: 1.5rem !important;
   padding-bottom: 1.5rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   3 ZONES – خلفيات داكنة بتدرجات
+═══════════════════════════════════════════════════════ */
+.zone {
+  padding: 12px 0;
+}
+
+/* القسم 1 – أزرق داكن (المنتج والعرض) */
+.zone-1 {
+  background: linear-gradient(180deg, #0d1520 0%, #0f1f35 100%);
+}
+
+/* القسم 2 – رمادي داكن (الطلب والفورم) */
+.zone-2 {
+  background: linear-gradient(180deg, #111827 0%, #1a2233 100%);
+}
+
+/* القسم 3 – نيلي داكن (التقييمات والثقة) */
+.zone-3 {
+  background: linear-gradient(180deg, #0c1424 0%, #0a0f1e 100%);
+}
+
+/* override: الكروت تكون بيضاء لتبرز على الخلفية الداكنة */
+.zone .card,
+.zone .prod-accordion,
+.zone .hbar,
+.zone .ticker-wrap,
+.zone .bundle,
+.zone .review-card,
+.zone .trust-badge-card {
+  box-shadow: 0 2px 16px rgba(0, 0, 0, .35);
+}
+
+/* نص أبيض للعناوين داخل الأقسام الداكنة */
+.zone .product-title {
+  color: #f1f5f9;
+}
+
+.zone .product-desc {
+  color: #94a3b8;
+}
+
+.zone .price-main {
+  color: #f87171;
+}
+
+.zone .price-was {
+  color: #64748b;
+}
+
+.zone .stars-row .review-count {
+  color: #94a3b8;
+}
+
+.zone .why-title {
+  color: #f1f5f9;
+}
+
+.zone .why-sub {
+  color: #94a3b8;
+}
+
+.zone .reviews-title {
+  color: #f1f5f9;
+}
+
+.zone .reviews-sub {
+  color: #94a3b8;
+}
+
+.zone .countdown-row {
+  background: #1e1008;
+  border-color: #92400e;
+  color: #fbbf24;
+}
+
+.zone .cd-stock {
+  color: #fb923c;
+}
+
+/* ═══════════════════ INLINE CTA BUTTON ═════════════════ */
+.inline-cta-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.inline-cta {
+  height: 52px !important;
+  font-size: 1rem !important;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  box-shadow: 0 4px 20px rgba(220, 38, 38, .45) !important;
+  animation: pulse-cta 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-cta {
+
+  0%,
+  100% {
+    box-shadow: 0 4px 20px rgba(220, 38, 38, .45);
+  }
+
+  50% {
+    box-shadow: 0 6px 28px rgba(220, 38, 38, .7);
+  }
+}
+
+.inline-cta-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: .7rem;
+  color: #94a3b8;
+  flex-wrap: wrap;
+}
+
+/* ═══════════════════ MAIN CTA BUTTON ═══════════════════ */
+.main-cta {
+  height: 54px;
+  font-size: 1rem !important;
+  background: linear-gradient(135deg, #16a34a, #15803d) !important;
+  box-shadow: 0 4px 20px rgba(22, 163, 74, .4) !important;
+  border-radius: 14px !important;
+  margin-top: 4px;
+}
+
+.main-cta:hover:not(:disabled) {
+  box-shadow: 0 6px 28px rgba(22, 163, 74, .6) !important;
+}
+
+/* ═══════════════════ VALIDATION ERRORS ════════════════ */
+.req {
+  color: #ef4444;
+  font-size: .7rem;
+}
+
+.inp-error {
+  border-color: #ef4444 !important;
+  background: #fff1f2 !important;
+}
+
+.sel-error .select-input {
+  border-color: #ef4444 !important;
+  background: #fff1f2 !important;
+}
+
+.err-msg {
+  font-size: .7rem;
+  color: #dc2626;
+  font-weight: 600;
+  margin-top: 1px;
+}
+
+/* ═══════════════ THANK YOU OVERLAY ════════════════════ */
+@keyframes ty-pop {
+  from {
+    opacity: 0;
+    transform: scale(.88) translateY(20px)
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0)
+  }
+}
+
+@keyframes ring-anim {
+  0% {
+    transform: scale(0);
+    opacity: 0
+  }
+
+  60% {
+    transform: scale(1.15)
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1
+  }
+}
+
+@keyframes check-draw {
+  from {
+    stroke-dashoffset: 60
+  }
+
+  to {
+    stroke-dashoffset: 0
+  }
+}
+
+.ty-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(0, 0, 0, .75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn .25s ease;
+}
+
+.ty-card {
+  background: #fff;
+  border-radius: 22px;
+  padding: 28px 20px 22px;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  animation: ty-pop .35s cubic-bezier(.34, 1.56, .64, 1) both;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .4);
+}
+
+.ty-icon-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ty-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid #22c55e;
+  animation: ring-anim .5s .1s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+
+.ty-check {
+  width: 42px;
+  height: 42px;
+  color: #16a34a;
+  animation: ty-pop .4s .25s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+
+.ty-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.ty-msg {
+  font-size: .85rem;
+  color: #4b5563;
+  line-height: 1.65;
+}
+
+.ty-steps {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.ty-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: .8rem;
+  color: #374151;
+  font-weight: 600;
+  text-align: right;
+}
+
+.ty-sn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #0f172a;
+  color: #fff;
+  font-size: .7rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ty-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: .7rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.ty-badges span {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: #f3f4f6;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.ty-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: var(--font-sans);
+  font-size: .82rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  transition: background .15s;
+}
+
+.ty-close:hover {
+  background: #e5e7eb;
 }

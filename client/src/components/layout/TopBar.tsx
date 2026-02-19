@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Truck, ShieldCheck, Package } from "lucide-react";
 
 const MESSAGES = [
-  { icon: <Truck style={{ width: 14, height: 14 }} />, text: "🚚 شحن مجاني على الطلبات فوق 199 ر.س" },
+  { icon: <Truck style={{ width: 14, height: 14 }} />, text: "🚚 شحن مجاني على جميع الطلبات داخل المملكة" },
   { icon: <Package style={{ width: 14, height: 14 }} />, text: "💵 الدفع عند الاستلام – ادفع بمجرد وصول المنتج" },
   { icon: <ShieldCheck style={{ width: 14, height: 14 }} />, text: "🛡️ ضمان 30 يوماً – استرجاع مجاني بدون شروط" },
 ];

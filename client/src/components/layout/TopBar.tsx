@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { Truck, ShieldCheck, Package } from "lucide-react";
 
 const MESSAGES = [
-  { icon: <Truck style={{ width: 14, height: 14 }} />, text: "🚚 شحن مجاني على جميع الطلبات داخل المملكة" },
-  { icon: <Package style={{ width: 14, height: 14 }} />, text: "💵 الدفع عند الاستلام – ادفع بمجرد وصول المنتج" },
-  { icon: <ShieldCheck style={{ width: 14, height: 14 }} />, text: "🛡️ ضمان 30 يوماً – استرجاع مجاني بدون شروط" },
+  { icon: <Truck style={{ width: 16, height: 16 }} />, text: "شحن سريع إلى جميع مناطق المملكة" },
+  { icon: <Package style={{ width: 16, height: 16 }} />, text: "الدفع عند الاستلام متاح" },
+  { icon: <ShieldCheck style={{ width: 16, height: 16 }} />, text: "ضمان استرجاع لمدة 30 يومًا" },
 ];
 
 export function TopBar() {
@@ -25,20 +25,7 @@ export function TopBar() {
   const msg = MESSAGES[idx];
 
   return (
-    <div style={{
-      background: "#111827",
-      color: "#fff",
-      padding: "8px 16px",
-      textAlign: "center",
-      fontSize: "0.8rem",
-      fontWeight: 700,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 6,
-      overflow: "hidden",
-      minHeight: 36,
-    }}>
+    <div className="topbar">
       <span
         style={{
           display: "flex", alignItems: "center", gap: 6,

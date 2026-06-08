@@ -14,7 +14,7 @@ import { generateWhatsAppLink } from "@/lib/whatsapp";
 import {
   Star, ShieldCheck, Truck, Check, BadgeCheck, Package,
   RotateCcw, PhoneCall, Flame, AlertTriangle, Users, Lock, ChevronDown,
-  CheckCircle, ArrowLeft,
+  CheckCircle, ArrowLeft, Zap, Gem, HeartHandshake, MapPin,
 } from "lucide-react";
 
 /* ═══════════════════════════ HOOKS ═══════════════════════════ */
@@ -53,12 +53,12 @@ const SAUDI_CITIES = [
 
 /* ═══════════════════ SOCIAL PROOF TICKER ════════════════════ */
 const TICKERS = [
-  "🛒 محمد من الرياض اشترى للتو",
-  "⭐️ سارة من جدة: «التوصيل كان سريع جداً!»",
-  "🛒 خالد من الدمام أضاف للسلة الآن",
-  "⭐️ نورة من مكة: «الدفع عند الاستلام ممتاز»",
-  "🔥 5 أشخاص يشاهدون هذا المنتج الآن",
-  "🛒 عبدالله من الخبر اشترى قبل دقيقتين",
+  "محمد من الرياض اشترى هذا المنتج للتو",
+  "سارة من جدة: التوصيل كان سريعًا جدًا",
+  "خالد من الدمام أضاف المنتج إلى طلبه",
+  "نورة من مكة: الدفع عند الاستلام ممتاز",
+  "5 أشخاص يشاهدون هذا المنتج الآن",
+  "عبدالله من الخبر اشترى قبل دقيقتين",
 ];
 
 function SocialTicker() {
@@ -91,9 +91,9 @@ function Gallery({ images, badge }: { images: string[]; badge: string }) {
       {images.length > 1 && (
         <div className="gallery-thumbs">
           {images.map((s, i) => (
-            <div key={i} className={`g-thumb ${active === i ? "active" : ""}`} onClick={() => setActive(i)}>
-              <img src={s} alt="" />
-            </div>
+            <button key={i} type="button" aria-label={`عرض صورة المنتج ${i + 1}`} className={`g-thumb ${active === i ? "active" : ""}`} onClick={() => setActive(i)}>
+              <img src={s} alt={`${i === 0 ? "الصورة الرئيسية" : "تفاصيل"} للمنتج`} loading="lazy" />
+            </button>
           ))}
         </div>
       )}
@@ -111,25 +111,34 @@ const BUNDLES = [
 function Bundles({ sel, onSel, base, cur }: { sel: string; onSel: (v: string) => void; base: number; cur: string }) {
   return (
     <div className="card">
-      <p className="card-title"><Flame className="icon-s orange-icon" /> اختر الكمية</p>
+      <div className="bundle-card-head">
+        <span className="order-step">1</span>
+        <div>
+          <p className="card-title"><Flame className="icon-s orange-icon" /> اختر العرض المناسب</p>
+          <p className="card-sub">كلما زادت الكمية، زاد التوفير</p>
+        </div>
+      </div>
       <div className="bundles">
         {BUNDLES.map((b) => {
           const total = (base * b.qty * (1 - b.disc)).toFixed(2);
           const orig = (base * b.qty).toFixed(2);
+          const unitPrice = (Number(total) / b.qty).toFixed(2);
           const on = sel === b.v;
           return (
-            <div key={b.v} className={`bundle ${on ? "bundle-on" : ""}`} onClick={() => onSel(b.v)}>
+            <button type="button" key={b.v} className={`bundle ${on ? "bundle-on" : ""}`} onClick={() => onSel(b.v)} aria-pressed={on}>
               {b.badge && <span className="b-badge" style={{ background: b.bc }}>{b.badge}</span>}
               <div className={`radio ${on ? "radio-on" : ""}`} />
               <div className="b-label">
                 <span className="b-name">{b.label}</span>
                 {b.disc > 0 && <span className="b-save">وفّر {b.disc * 100}%</span>}
+                <span className="b-unit">{unitPrice} {cur} للقطعة</span>
               </div>
               <div className="b-price">
+                <span className="b-price-label">الإجمالي</span>
                 <span className="b-total">{total} {cur}</span>
                 {b.disc > 0 && <span className="b-orig">{orig} {cur}</span>}
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -149,8 +158,13 @@ function OrderForm({
 }) {
   return (
     <div className="card order-card">
-      <p className="card-title"><Package className="icon-s blue-icon" /> أدخل بياناتك لإتمام الطلب</p>
-      <p className="card-sub">سيتصل بك فريقنا لتأكيد الطلب خلال دقائق</p>
+      <div className="order-card-head">
+        <span className="order-step">2</span>
+        <div>
+          <p className="card-title"><Package className="icon-s blue-icon" /> بيانات التوصيل</p>
+          <p className="card-sub">أدخل بياناتك وسنتصل بك لتأكيد الطلب قبل الشحن</p>
+        </div>
+      </div>
 
       <div className="fields">
         {/* الاسم */}
@@ -162,7 +176,7 @@ function OrderForm({
             onChange={(e) => set("name", e.target.value)}
             className={errors.name ? "inp-error" : ""}
           />
-          {errors.name && <span className="err-msg">⚠️ الاسم مطلوب</span>}
+          {errors.name && <span className="err-msg">الاسم مطلوب</span>}
         </div>
 
         {/* رقم الجوال */}
@@ -178,7 +192,7 @@ function OrderForm({
               onChange={(e) => set("phone", e.target.value)}
             />
           </div>
-          {errors.phone && <span className="err-msg">⚠️ أدخل رقم جوال صحيح يبدأ بـ 05</span>}
+          {errors.phone && <span className="err-msg">أدخل رقم جوال صحيح يبدأ بـ 05</span>}
         </div>
 
         {/* المدينة */}
@@ -191,40 +205,36 @@ function OrderForm({
             </select>
             <ChevronDown className="select-arrow" />
           </div>
-          {errors.city && <span className="err-msg">⚠️ اختر مدينتك</span>}
+          {errors.city && <span className="err-msg">اختر مدينتك</span>}
         </div>
 
-        {/* الحي */}
         <div className="field">
-          <label>الحي</label>
-          <Input placeholder="مثال: حي النزهة، حي العليا..." value={fd.district}
-            onChange={(e) => set("district", e.target.value)} />
-        </div>
-
-        {/* الشارع */}
-        <div className="field">
-          <label>اسم الشارع</label>
-          <Input placeholder="مثال: شارع الأمير محمد" value={fd.street}
-            onChange={(e) => set("street", e.target.value)} />
-        </div>
-
-        {/* العنوان الوطني */}
-        <div className="field">
-          <label>العنوان الوطني</label>
-          <Input placeholder="مثال: رقم المبنى، اسم الشارع، الرمز البريدي" value={fd.national}
-            onChange={(e) => set("national", e.target.value)} />
-        </div>
-
-        {/* ملاحظات */}
-        <div className="field">
-          <label>ملاحظات للتوصيل (اختياري)</label>
-          <textarea
-            className="notes-input"
-            placeholder="أي تعليمات إضافية... مثال: اتصل قبل الوصول"
-            rows={2}
-            value={fd.notes}
-            onChange={(e) => set("notes", e.target.value)}
+          <label>عنوان التوصيل بالتفصيل <span className="req">*</span></label>
+          <Input
+            placeholder="الحي، الشارع، رقم المبنى"
+            value={fd.address}
+            onChange={(e) => set("address", e.target.value)}
+            className={errors.address ? "inp-error" : ""}
           />
+          {errors.address && <span className="err-msg">عنوان التوصيل مطلوب</span>}
+        </div>
+
+        <div className="field national-address-field">
+          <div className="field-label-row">
+            <label>العنوان الوطني المختصر</label>
+            <span className="optional-label">اختياري</span>
+          </div>
+          <Input
+            placeholder="مثال: RRAA1234"
+            value={fd.national}
+            onChange={(e) => set("national", e.target.value.toUpperCase())}
+            className={errors.national ? "inp-error national-address-input" : "national-address-input"}
+            dir="ltr"
+            maxLength={8}
+            autoCapitalize="characters"
+          />
+          <span className="field-help">4 أحرف و4 أرقام لتوصيل أدق وأسرع.</span>
+          {errors.national && <span className="err-msg">أدخل 4 أحرف ثم 4 أرقام، مثل RRAA1234</span>}
         </div>
       </div>
 
@@ -241,6 +251,31 @@ function OrderForm({
         <span><Check className="icon-xs green-icon" /> دفع عند الاستلام</span>
       </div>
     </div>
+  );
+}
+
+function Benefits({ features }: { features: string[] }) {
+  const icons = [Gem, ShieldCheck, Zap, HeartHandshake];
+  return (
+    <section className="benefits-section" aria-labelledby="benefits-title">
+      <div className="conversion-heading">
+        <span>لماذا هذا المنتج؟</span>
+        <h2 id="benefits-title">تفاصيل صغيرة تصنع فرقًا واضحًا</h2>
+        <p>صُمم ليمنحك استخدامًا عمليًا وجودة يمكنك الاعتماد عليها كل يوم.</p>
+      </div>
+      <div className="benefits-grid">
+        {features.map((feature, index) => {
+          const Icon = icons[index % icons.length];
+          return (
+            <article key={feature} className="benefit-card">
+              <span><Icon className="icon-m" /></span>
+              <h3>{feature}</h3>
+              <p>جودة مختارة بعناية لتجربة أفضل وعمر استخدام أطول.</p>
+            </article>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -276,7 +311,7 @@ function StickyCTA({ price, cur, onOrder, loading }: {
       <div className="sticky-inner">
         <div className="sticky-info">
           <span className="sticky-price">{price} {cur}</span>
-          <span className="sticky-label">الدفع عند الاستلام 💵</span>
+          <span className="sticky-label">الدفع عند الاستلام</span>
         </div>
         <button className={`cta-btn sticky-btn ${loading ? "loading" : ""}`} onClick={onOrder} disabled={loading}>
           {loading ? <span className="spinner" /> : <><Package className="icon-s" /> اطلب الآن</>}
@@ -302,7 +337,7 @@ function ThankYouOverlay({ name, onClose }: { name: string; onClose: () => void 
           <CheckCircle className="ty-check" />
         </div>
 
-        <h2 className="ty-title">شكراً {name || "لك"} 🎉</h2>
+        <h2 className="ty-title">شكرًا {name || "لك"}</h2>
         <p className="ty-msg">
           تم استلام طلبك بنجاح!<br />
           فريقنا سيتصل بك <strong>خلال دقائق</strong> لتأكيد الطلب وترتيب التوصيل.
@@ -361,7 +396,7 @@ export default function ProductPage() {
   const product = storeData.products.find((p) => p.slug === params?.slug) || storeData.products[0];
 
   const [sel, setSel] = useState("1");
-  const [fd, setFd] = useState({ name: "", phone: "", city: "", district: "", street: "", national: "", notes: "" });
+  const [fd, setFd] = useState({ name: "", phone: "", city: "", address: "", national: "" });
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
@@ -387,6 +422,10 @@ export default function ProductPage() {
     if (!fd.name.trim()) newErrors.name = true;
     if (!fd.phone.trim() || !/^05\d{8}$/.test(fd.phone.replace(/\s/g, ""))) newErrors.phone = true;
     if (!fd.city) newErrors.city = true;
+    if (!fd.address.trim()) newErrors.address = true;
+    if (fd.national.trim() && !/^[A-Z]{4}\d{4}$/.test(fd.national.trim().toUpperCase())) {
+      newErrors.national = true;
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -407,7 +446,11 @@ export default function ProductPage() {
 
     setLoading(true);
     setTimeout(() => {
-      const addrParts = [fd.city, fd.district, fd.street, fd.national].filter(Boolean);
+      const addrParts = [
+        fd.city,
+        fd.address,
+        fd.national ? `العنوان الوطني: ${fd.national}` : "",
+      ].filter(Boolean);
       const link = generateWhatsAppLink({
         productName: product.name,
         price: Number(pricing.total),
@@ -415,7 +458,7 @@ export default function ProductPage() {
         bundle: sel === "1" ? "قطعة واحدة" : `${sel} قطع`,
         customerName: fd.name,
         customerPhone: fd.phone,
-        customerAddress: addrParts.join(" – ") + (fd.notes ? " | ملاحظات: " + fd.notes : ""),
+        customerAddress: addrParts.join(" – "),
       });
       window.open(link, "_blank");
       setLoading(false);
@@ -433,16 +476,21 @@ export default function ProductPage() {
       <Header />
 
       {/* ══════════ القسم 1: المنتج ══════════ */}
-      <div>
-        <div className="page-main">
-          <Gallery images={product.images} badge={product.discountLabel} />
+      <main>
+      <section className="product-hero-section">
+        <div className="product-hero-grid">
+          <div className="product-gallery-column">
+            <Gallery images={product.images} badge={product.discountLabel} />
+          </div>
 
+          <div className="product-purchase-column">
           <div className="details-block">
+            <span className="product-eyebrow">اختيار العملاء هذا الأسبوع</span>
             <div className="stars-row">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Star key={i} className={`star ${i <= Math.round(product.ratingAvg) ? "star-on" : "star-off"}`} />
               ))}
-              <span className="review-count">({RAND_REVIEWS}+ تقييم)</span>
+              <span className="review-count">4.8 ({RAND_REVIEWS}+ تقييم)</span>
               <span className="verified-badge"><BadgeCheck className="icon-xs" /> مؤكد</span>
             </div>
 
@@ -460,7 +508,7 @@ export default function ProductPage() {
               <AlertTriangle className="icon-xs red-icon" />
               <span>العرض ينتهي بعد:</span>
               <span className="cd-timer">{countdown}</span>
-              <span className="cd-stock">· {RAND_STOCK} قطعة فقط</span>
+              <span className="cd-stock">{RAND_STOCK} قطعة متاحة</span>
             </div>
 
             <SocialTicker />
@@ -468,11 +516,11 @@ export default function ProductPage() {
 
           {/* ── زر اشتري #1 – بعد التفاصيل مباشرة ── */}
           <div className="inline-cta-wrap">
-            <InlineCTA onClick={scrollToForm} loading={false} label="اطلب الآن – الدفع عند الاستلام 💳" />
+            <InlineCTA onClick={scrollToForm} loading={false} label="اطلب الآن – الدفع عند الاستلام" />
             <p className="inline-cta-hint">
               <ShieldCheck className="icon-xs green-icon" /> ضمان 30 يوم &nbsp;|&nbsp;
               <Truck className="icon-xs blue-icon" /> شحن مجاني &nbsp;|&nbsp;
-              <Package className="icon-xs orange-icon" /> COD
+              <Package className="icon-xs orange-icon" /> دفع عند الاستلام
             </p>
           </div>
 
@@ -482,17 +530,38 @@ export default function ProductPage() {
             <div className="hbar-sep" />
             <div className="hbar-item"><Truck className="icon-s blue-icon" /><span>شحن مجاني</span></div>
             <div className="hbar-sep" />
-            <div className="hbar-item"><Package className="icon-s orange-icon" /><span>COD</span></div>
+            <div className="hbar-item"><Package className="icon-s orange-icon" /><span>دفع عند الاستلام</span></div>
             <div className="hbar-sep" />
             <div className="hbar-item"><RotateCcw className="icon-s purple-icon" /><span>إرجاع مجاني</span></div>
           </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* ══════════ القسم 2: الطلب ══════════ */}
-      <div>
-        <div className="page-main">
+      <section className="order-section">
+        <div className="order-layout">
+          <div className="order-offer-copy">
+            <span className="order-kicker">اطلبه الآن بخطوات بسيطة</span>
+            <h2>أكمل طلبك في أقل من دقيقة</h2>
+            <p>اختر العرض المناسب، أدخل بيانات التوصيل، وسنتواصل معك لتأكيد كل التفاصيل قبل الشحن.</p>
+            <div className="order-points">
+              <span><CheckCircle className="icon-s" /> لا تحتاج إلى بطاقة بنكية</span>
+              <span><PhoneCall className="icon-s" /> تأكيد الطلب هاتفيًا</span>
+              <span><MapPin className="icon-s" /> توصيل لجميع المناطق</span>
+            </div>
+          </div>
+          <div className="order-form-column">
           <Bundles sel={sel} onSel={setSel} base={product.price} cur={storeData.currency} />
+
+          <div className="order-separator" aria-hidden="true">
+            <span className="order-separator-line" />
+            <span className="order-separator-status">
+              <CheckCircle className="icon-s" />
+              تم اختيار العرض، أكمل بيانات التوصيل
+            </span>
+            <span className="order-separator-line" />
+          </div>
 
           <div ref={formRef}>
             <OrderForm fd={fd} set={set} errors={errors} cur={storeData.currency} pricing={pricing} />
@@ -554,27 +623,37 @@ export default function ProductPage() {
 
           {/* ── زر اشتري #2 – بعد الأكورديون ── */}
           <div className="inline-cta-wrap">
-            <InlineCTA onClick={handleOrder} loading={loading} label="اطلب الآن وادفع عند الاستلام 🚀" />
+            <InlineCTA onClick={handleOrder} loading={loading} label="اطلب الآن وادفع عند الاستلام" />
             <p className="inline-cta-hint">
-              🔒 بياناتك محمية &nbsp;|&nbsp; 📞 نتصل بك للتأكيد
+              <Lock className="icon-xs" /> بياناتك محمية &nbsp;|&nbsp; <PhoneCall className="icon-xs" /> نتصل بك للتأكيد
             </p>
           </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="conversion-container">
+        <Benefits features={product.features} />
+        <div className="section-cta">
+          <InlineCTA onClick={scrollToForm} loading={false} label="احصل على العرض الآن" />
+          <p>استرجاع سهل خلال 30 يومًا</p>
         </div>
       </div>
 
       {/* ══════════ القسم 3: التقييمات والثقة ══════════ */}
-      <div>
-        <div className="page-main">
+      <section className="proof-section">
+        <div className="conversion-container">
           <div className="why-section">
             <h2 className="why-title">لماذا تتسوق معنا؟</h2>
-            <p className="why-sub">نفس ضمانات كبرى المتاجر – بلمسة محلية سعودية 🇸🇦</p>
+            <p className="why-sub">تجربة شراء محلية واضحة وآمنة من الطلب حتى الاستلام</p>
             <TrustBadges />
           </div>
 
           <Reviews />
           <FAQ />
         </div>
-      </div>
+      </section>
+      </main>
 
       <Footer />
 

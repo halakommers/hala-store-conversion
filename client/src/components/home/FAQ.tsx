@@ -9,7 +9,7 @@ import { storeData } from "@/data/store";
 
 export function FAQ() {
   return (
-    <section className="py-16 bg-white">
+    <section id="faq" className="py-16 bg-white">
       <div className="container mx-auto px-4 max-w-2xl text-center">
         <h2 className="text-3xl font-bold mb-2">الأسئلة الشائعة</h2>
         <p className="text-gray-500 mb-8">إذا لم تجد إجابة لسؤالك هنا، يمكنك الاتصال بنا</p>

@@ -6,14 +6,14 @@ import { Features } from "@/components/home/Features";
 import { ProductGrid } from "@/components/home/ProductGrid";
 import { FAQ } from "@/components/home/FAQ";
 import { Reviews } from "@/components/home/Reviews";
-import { MessageCircle } from "lucide-react";
+import { ArrowLeft, MessageCircle } from "lucide-react";
 import { storeData } from "@/data/store";
 
 export default function Home() {
   const whatsappLink = `https://wa.me/${storeData.whatsappNumber}`;
 
   return (
-    <div className="min-h-screen flex flex-col font-sans">
+    <div className="store-home min-h-screen flex flex-col font-sans">
       <TopBar />
       <Header />
       
@@ -33,10 +33,21 @@ export default function Home() {
         href={whatsappLink}
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 left-6 z-50 bg-[#22C55E] text-white p-4 rounded-full shadow-lg hover:scale-110 transition-transform duration-300"
+        aria-label="تواصل معنا عبر واتساب"
+        className="whatsapp-button"
       >
-        <MessageCircle className="w-8 h-8 fill-current" />
+        <MessageCircle className="h-6 w-6" />
       </a>
+      <div className="mobile-buy-bar">
+        <div>
+          <strong>تسوّق بثقة</strong>
+          <span>الدفع عند الاستلام</span>
+        </div>
+        <a href="#products">
+          عرض المنتجات
+          <ArrowLeft className="h-4 w-4" />
+        </a>
+      </div>
     </div>
   );
 }

@@ -61,7 +61,7 @@ const REVIEWS = [
 
 export function Reviews() {
   return (
-    <section className="reviews-section">
+    <section id="reviews" className="reviews-section">
       {/* header */}
       <div className="reviews-header">
         <div className="overall-stars">
@@ -71,7 +71,7 @@ export function Reviews() {
           <span className="overall-score">4.8 / 5</span>
         </div>
         <h2 className="reviews-title">ماذا يقول عملاؤنا</h2>
-        <p className="reviews-sub">جميع التقييمات من مشتريات حقيقية مؤكدة 🇸🇦</p>
+        <p className="reviews-sub">تقييمات موثقة من عملائنا داخل المملكة</p>
       </div>
 
       {/* grid 2 columns */}
@@ -93,7 +93,7 @@ export function Reviews() {
                 <div className="r-name">
                   {r.name} <CheckCircle style={{ width: 11, height: 11, color: "#3b82f6", display: "inline" }} />
                 </div>
-                <div className="r-city">📍 {r.city}</div>
+                <div className="r-city">{r.city}</div>
               </div>
               <span className="r-verified">موثّق</span>
             </div>

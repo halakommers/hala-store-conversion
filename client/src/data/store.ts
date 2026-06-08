@@ -15,15 +15,15 @@ export interface Product {
 }
 
 export const storeData = {
-  brandName: "متحر هلا",
+  brandName: "متجر هلا",
   whatsappNumber: "966500000000", // Placeholder
   currency: "ر.س",
   freeShippingThreshold: 199,
   
   hero: {
-    title: "شغف بالجودة وخدمة لا تُنسى",
-    subtitle: "نحن ملتزمون بتقديم تجربة تسوق استثنائية. منتجات مختارة بعناية لتناسب ذوقك الرفيع.",
-    cta: "تسوق الآن",
+    title: "منتجات مختارة تجعل يومك أسهل",
+    subtitle: "جودة موثوقة، أسعار مناسبة، وتجربة شراء بسيطة من الطلب حتى وصول المنتج إلى بابك.",
+    cta: "اكتشف المنتجات",
     image: "/images/banner-hero.jpg"
   },
 

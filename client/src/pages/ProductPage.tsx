@@ -14,7 +14,7 @@ import { generateWhatsAppLink } from "@/lib/whatsapp";
 import {
   Star, ShieldCheck, Truck, Check, BadgeCheck, Package,
   RotateCcw, PhoneCall, Flame, AlertTriangle, Users, Lock, ChevronDown,
-  CheckCircle, ArrowLeft, Zap, Gem, HeartHandshake, MapPin,
+  CheckCircle, ArrowLeft, Zap, Gem, HeartHandshake, MapPin, Banknote, CreditCard,
 } from "lucide-react";
 
 /* ═══════════════════════════ HOOKS ═══════════════════════════ */
@@ -146,6 +146,69 @@ function Bundles({ sel, onSel, base, cur }: { sel: string; onSel: (v: string) =>
   );
 }
 
+type PaymentMethod = "cod" | "online";
+
+function PaymentOptions({
+  method,
+  onMethod,
+}: {
+  method: PaymentMethod;
+  onMethod: (method: PaymentMethod) => void;
+}) {
+  const providers = [
+    { name: "تابي", logo: "/images/payments/tabby.svg" },
+    { name: "تمارا", logo: "/images/payments/tamara.svg" },
+    { name: "Apple Pay", logo: "/images/payments/apple-pay.svg" },
+    { name: "مدى", logo: "/images/payments/mada.svg" },
+    { name: "STC Pay", logo: "/images/payments/stc-pay.svg" },
+  ];
+
+  return (
+    <div className="card payment-card">
+      <div className="payment-card-head">
+        <span className="order-step">2</span>
+        <div>
+          <p className="card-title"><CreditCard className="icon-s blue-icon" /> اختر طريقة الدفع</p>
+          <p className="card-sub">يمكنك الدفع عند الاستلام أو اختيار الدفع الإلكتروني</p>
+        </div>
+      </div>
+
+      <div className="payment-method-tabs" role="radiogroup" aria-label="طريقة الدفع">
+        <button
+          type="button"
+          role="radio"
+          aria-checked={method === "cod"}
+          className={`payment-method-tab ${method === "cod" ? "active" : ""}`}
+          onClick={() => onMethod("cod")}
+        >
+          <span className="payment-method-icon"><Banknote className="icon-m" /></span>
+          <span><strong>الدفع عند الاستلام</strong><small>ادفع عندما يصلك الطلب</small></span>
+          <span className="payment-check"><Check className="icon-xs" /></span>
+        </button>
+        <button
+          type="button"
+          role="radio"
+          aria-checked={method === "online"}
+          className={`payment-method-tab ${method === "online" ? "active" : ""}`}
+          onClick={() => onMethod("online")}
+        >
+          <span className="payment-method-icon"><CreditCard className="icon-m" /></span>
+          <span className="online-method-copy">
+            <strong>دفع أونلاين</strong>
+            <small>خيارات مرنة وآمنة</small>
+            <span className="accepted-payment-logos" aria-label="وسائل الدفع الإلكتروني المتاحة">
+              {providers.map((item) => (
+                <img key={item.name} src={item.logo} alt={item.name} width="58" height="22" />
+              ))}
+            </span>
+          </span>
+          <span className="payment-check"><Check className="icon-xs" /></span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ═══════════════════════ ORDER FORM ════════════════════════ */
 function OrderForm({
   fd, set, errors, cur, pricing,
@@ -159,7 +222,7 @@ function OrderForm({
   return (
     <div className="card order-card">
       <div className="order-card-head">
-        <span className="order-step">2</span>
+        <span className="order-step">3</span>
         <div>
           <p className="card-title"><Package className="icon-s blue-icon" /> بيانات التوصيل</p>
           <p className="card-sub">أدخل بياناتك وسنتصل بك لتأكيد الطلب قبل الشحن</p>
@@ -396,6 +459,7 @@ export default function ProductPage() {
   const product = storeData.products.find((p) => p.slug === params?.slug) || storeData.products[0];
 
   const [sel, setSel] = useState("1");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cod");
   const [fd, setFd] = useState({ name: "", phone: "", city: "", address: "", national: "" });
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
@@ -458,7 +522,11 @@ export default function ProductPage() {
         bundle: sel === "1" ? "قطعة واحدة" : `${sel} قطع`,
         customerName: fd.name,
         customerPhone: fd.phone,
-        customerAddress: addrParts.join(" – "),
+        customerAddress: `${addrParts.join(" – ")} | الدفع: ${
+          paymentMethod === "cod"
+            ? "الدفع عند الاستلام"
+            : "دفع أونلاين"
+        }`,
       });
       window.open(link, "_blank");
       setLoading(false);
@@ -574,6 +642,20 @@ export default function ProductPage() {
             <span className="order-separator-line" />
           </div>
 
+          <PaymentOptions
+            method={paymentMethod}
+            onMethod={setPaymentMethod}
+          />
+
+          <div className="order-separator payment-form-separator" aria-hidden="true">
+            <span className="order-separator-line" />
+            <span className="order-separator-status">
+              <CheckCircle className="icon-s" />
+              اخترت طريقة الدفع، أدخل بيانات التوصيل
+            </span>
+            <span className="order-separator-line" />
+          </div>
+
           <div ref={formRef}>
             <OrderForm fd={fd} set={set} errors={errors} cur={storeData.currency} pricing={pricing} />
           </div>
@@ -586,7 +668,7 @@ export default function ProductPage() {
           >
             {loading
               ? <span className="spinner" />
-              : <><Package className="icon-s" /> اطلب الآن – الدفع عند الاستلام</>}
+              : <><Package className="icon-s" /> {paymentMethod === "cod" ? "اطلب الآن – الدفع عند الاستلام" : "تأكيد الطلب والدفع أونلاين"}</>}
           </button>
 
           {/* أكورديون */}

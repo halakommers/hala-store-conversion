@@ -919,9 +919,42 @@ html {
   margin-top: 16px;
 }
 
+.price-copy,
+.price-saving {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.price-caption {
+  color: #777f79;
+  font-size: .7rem;
+  font-weight: 750;
+}
+
 .product-hero-section .price-main {
   color: #a3372e;
   font-size: 1.75rem;
+}
+
+.hero-quick-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.hero-quick-benefits span {
+  min-height: 30px;
+  padding: 5px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #dce8df;
+  border-radius: 999px;
+  background: #f4f9f5;
+  color: #3d684d;
+  font-size: .68rem;
+  font-weight: 750;
 }
 
 .product-hero-section .countdown-row {
@@ -1368,6 +1401,165 @@ html {
 
   .benefit-card p {
     font-size: .8rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-root .topbar {
+    min-height: 30px;
+    padding-block: 5px;
+    font-size: .7rem;
+  }
+
+  .page-root .header-inner {
+    height: 56px;
+  }
+
+  .page-root .brand-link {
+    font-size: 1.05rem;
+  }
+
+  .page-root .brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+  }
+
+  .product-hero-section {
+    padding: 8px 0 22px;
+  }
+
+  .product-hero-grid {
+    gap: 10px;
+  }
+
+  .product-hero-section .gallery {
+    gap: 5px;
+    padding: 3px;
+    border-radius: 21px;
+  }
+
+  .product-hero-section .gallery-main {
+    height: min(43vh, 310px);
+    min-height: 235px;
+    aspect-ratio: auto;
+    border-radius: 19px;
+  }
+
+  .product-hero-section .gallery-img {
+    object-position: center 35%;
+  }
+
+  .product-hero-section .gallery-thumbs {
+    display: none;
+  }
+
+  .product-hero-section .g-badge {
+    top: 9px;
+    right: 9px;
+    padding: 5px 9px;
+  }
+
+  .product-hero-section .g-secure {
+    bottom: 9px;
+    left: 9px;
+    min-height: 30px;
+    padding: 5px 8px;
+  }
+
+  .product-hero-section .details-block {
+    gap: 6px;
+    padding: 8px 3px 0;
+  }
+
+  .product-eyebrow {
+    margin-bottom: 0;
+    font-size: .68rem;
+  }
+
+  .product-hero-section .stars-row {
+    padding: 5px 8px;
+  }
+
+  .product-hero-section .product-title {
+    font-size: 1.55rem;
+    line-height: 1.18;
+  }
+
+  .product-hero-section .product-desc {
+    margin-top: 1px;
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: .8rem;
+    line-height: 1.55;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .hero-quick-benefits {
+    gap: 5px;
+  }
+
+  .hero-quick-benefits span {
+    min-height: 27px;
+    padding: 4px 7px;
+    font-size: .62rem;
+  }
+
+  .product-hero-section .price-block {
+    margin-top: 2px;
+    padding: 10px 12px;
+    justify-content: space-between;
+  }
+
+  .price-copy {
+    display: grid;
+    gap: 0;
+  }
+
+  .product-hero-section .price-main {
+    font-size: 1.4rem;
+  }
+
+  .price-saving {
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 3px;
+  }
+
+  .product-hero-section .countdown-row {
+    width: 100%;
+    min-height: 38px;
+    margin-top: 2px;
+    padding: 7px 9px;
+    justify-content: center;
+    font-size: .68rem;
+  }
+
+  .product-hero-section .ticker-wrap {
+    min-height: 36px;
+    margin-top: 0;
+    justify-content: center;
+    font-size: .68rem;
+  }
+
+  .product-hero-section .inline-cta-wrap {
+    display: none;
+  }
+
+  .product-hero-section .hbar {
+    display: grid;
+    grid-template-columns: repeat(4, max-content);
+    gap: 12px;
+    padding: 8px 10px;
+  }
+
+  .product-hero-section .hbar-sep {
+    display: none;
+  }
+
+  .product-hero-section .hbar-item {
+    font-size: .65rem;
   }
 }
 

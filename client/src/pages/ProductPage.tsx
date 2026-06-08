@@ -497,10 +497,21 @@ export default function ProductPage() {
             <h1 className="product-title">{product.name}</h1>
             <p className="product-desc">{product.shortDescription}</p>
 
+            <div className="hero-quick-benefits" aria-label="أهم مميزات المنتج">
+              {product.features.slice(0, 3).map((feature) => (
+                <span key={feature}><Check className="icon-xs" /> {feature}</span>
+              ))}
+            </div>
+
             <div className="price-block">
-              <span className="price-main">{product.price} {storeData.currency}</span>
-              <span className="price-was">{product.compareAt} {storeData.currency}</span>
-              <span className="price-disc">{product.discountLabel}</span>
+              <div className="price-copy">
+                <span className="price-caption">سعر العرض</span>
+                <span className="price-main">{product.price} {storeData.currency}</span>
+              </div>
+              <div className="price-saving">
+                <span className="price-was">{product.compareAt} {storeData.currency}</span>
+                <span className="price-disc">{product.discountLabel}</span>
+              </div>
             </div>
 
             {/* عداد تنازلي */}
